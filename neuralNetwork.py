@@ -1,18 +1,21 @@
 import numpy as np
+import random
+
+mutChance = 0.2
 
 def dReLU(x):
     return [[float(1) if a > 0 else float(0) for a in b] for b in x]
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(np.multiply(-1, x)))
+    return 1 / (1 + np.exp(np.multiply(-1, x))) - 0.5
 
 class Layer:
     def __init__(self, n_in, n_out, activation):
         self.n_in = n_in
         self.n_out = n_out
         self.weights = np.random.randn(n_in,n_out)
-        self.biases = np.zeros((1,n_out))
-        # self.biases = np.random.randn(1,n_out)
+        # self.biases = np.zeros((1,n_out))
+        self.biases = np.random.randn(1,n_out)
         self.activation = activation
 
     def forward(self, inputs):
@@ -23,6 +26,8 @@ class Layer:
             self.activate_ReLU()
         if self.activation == 'sigmoid':
             self.activate_softmax()
+        else:
+            pass
 
     def activate_ReLU(self):
         self.output = np.maximum(0, self.output)
@@ -31,8 +36,12 @@ class Layer:
         self.output = sigmoid(self.output)
 
     def mutate(self, rate):
-        self.weights += rate * np.random.randn(self.n_in, self.n_out)
-        self.biases += rate * np.random.randn(1,self.n_out)
+        dweights = [[rate * random.random()-0.5 if random.random() < mutChance else 0 for _ in range(self.n_out)] for __ in range(self.n_in)]
+        dbiases = [[rate * random.random()-0.5 if random.random() < mutChance else 0 for _ in range(self.n_out)]]
+        self.weights += dweights
+        self.biases += dbiases
+        # self.weights += rate * np.random.randn(self.n_in, self.n_out)
+        # self.biases += rate * np.random.randn(1,self.n_out)
 
     def calc_error(self, input, target, lr=1, nextlayer=None, prevlayer=None):
         if nextlayer is None:
@@ -103,11 +112,11 @@ class NeuralNetwork:
 
 
 # network = NeuralNetwork(Layer(2,16, 'sigmoid'), Layer(16,16, 'sigmoid'), Layer(16,1, 'sigmoid'), learningRate=0.1)
-#
+
 # trainingdata = []
-#
-#
-#
+
+
+# #
 # for n in range(10000):
 #     pick1 = np.random.randint(2)
 #     pick2 = np.random.randint(2)
@@ -115,14 +124,14 @@ class NeuralNetwork:
 #     if pick1 == pick2:
 #         t = 0
 #     trainingdata.append([[pick1, pick2], [t]])
-#
-#
-#
+# #
+# #
+
 # for n in trainingdata:
 #     # network.feedForward(n[0])
 #     network.backpropagate(n[0], n[1])
-#
-#
+
+
 # print(network.feedForward([0,1]))
 # print(network.feedForward([1,0]))
 # print(network.feedForward([1,1]))
